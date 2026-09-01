@@ -1,5 +1,5 @@
 
-# Training Shipping Management System
+# Shipping Management System
 Shipping Management application built using ASP.NET Web API, C#, SQL Server, HTML, Bootstrap, JavaScript, jQuery, and AJAX.
 ## Technologies
 ### Backend
