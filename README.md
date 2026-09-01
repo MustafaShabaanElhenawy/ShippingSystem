@@ -1,32 +1,18 @@
- Shipping Management System
+Training Shipping Management System
 
-A mini Shipping Management System built as the final training project using ASP.NET Web API, C#, SQL Server, ADO.NET, jQuery, AJAX, and Bootstrap.
+Shipping Management application built using ASP.NET Web API, C#, SQL Server, ADO.NET, HTML, Bootstrap, JavaScript, jQuery, and AJAX.
 
- Features
-
-* Client Management (CRUD + Search)
-* Voyage Management (CRUD + Search)
-* Bill Management (CRUD + Search)
-* Container Management (CRUD + Search)
-* Shipping Summary Report
-* SQL View for reporting
-* Stored Procedures for database operations
-* BLL / DAL layered architecture
-* Frontend & Backend validation
-* AJAX API integration
-* Error handling & delete confirmation
-* Dynamic dropdowns for Clients, Voyages, and Bills
-
- Technologies
+Technologies
 
 Backend
 
 * C#
-* .NET Framework 4.x
 * ASP.NET Web API
-* ADO.NET
 * SQL Server
-* Stored Procedures & Views
+* ADO.NET
+* BLL / DAL
+* Stored Procedures
+* SQL Views
 
 Frontend
 
@@ -37,74 +23,101 @@ Frontend
 * jQuery
 * AJAX
 
-Tools
+Features
 
-* Visual Studio
-* SQL Server Management Studio
-* Postman
-* Git & GitHub
+* Client management (CRUD)
+* Voyage management (CRUD)
+* Bill management (CRUD)
+* Container management (CRUD)
+* Search clients
+* Search voyages
+* Search bills
+* Search containers
+* Client and Voyage dropdowns in Bills
+* Bill dropdown in Containers
+* Shipping Summary report
+* SQL View for reporting
+* Form validation
+* API error handling
+* Success and error messages
+* Delete confirmation
 
- Architecture
+API Endpoints
 
-Frontend
-   ↓
-jQuery AJAX
-   ↓
-Web API
-   ↓
-BLL
-   ↓
-DAL
-   ↓
-SQL Server
+Method	Endpoint	Description
+GET	/api/Clients	Get all clients
+GET	/api/Clients/{id}	Get client by ID
+POST	/api/Clients	Create client
+PUT	/api/Clients/{id}	Update client
+DELETE	/api/Clients/{id}	Delete client
+GET	/api/Voyages	Get all voyages
+GET	/api/Voyages/{id}	Get voyage by ID
+POST	/api/Voyages	Create voyage
+PUT	/api/Voyages/{id}	Update voyage
+DELETE	/api/Voyages/{id}	Delete voyage
+GET	/api/Bills	Get all bills
+GET	/api/Bills/{id}	Get bill by ID
+POST	/api/Bills	Create bill
+PUT	/api/Bills/{id}	Update bill
+DELETE	/api/Bills/{id}	Delete bill
+GET	/api/Containers	Get all containers
+GET	/api/Containers/{id}	Get container by ID
+POST	/api/Containers	Create container
+PUT	/api/Containers/{id}	Update container
+DELETE	/api/Containers/{id}	Delete container
 
-🗄️ Database
+Database
 
 Database: TrainingShippingDB
 
 Main tables:
 
-Clients
-Voyages
-Bills
-Containers
+* Clients
+* Voyages
+* Bills
+* Containers
 
 Relationships:
 
-Client ──→ Bill ──→ Container
-Voyage ──→ Bill
+Client
+   ↓
+Bills
+   ↓
+Containers
+Voyage
+   ↓
+Bills
 
- API Endpoints
+The database uses Primary Keys, Foreign Keys, Identity columns, constraints, Stored Procedures, and a SQL View for the Shipping Summary report.
 
-/api/Clients
-/api/Voyages
-/api/Bills
-/api/Containers
+Application Flow
 
-Each module supports:
+HTML / Bootstrap
+      ↓
+JavaScript / jQuery
+      ↓
+AJAX
+      ↓
+ASP.NET Web API
+      ↓
+BLL
+      ↓
+DAL
+      ↓
+SQL Server
 
-GET
-GET by ID
-POST
-PUT
-DELETE
-Search
+How to Run
 
- Setup
+1. Configure the SQL Server connection in the backend.
+2. Create the TrainingShippingDB database and run the SQL scripts.
+3. Run the ASP.NET Web API using Visual Studio.
+4. Open the frontend pages.
+5. Make sure the backend API is running before using the frontend.
 
-1. Create TrainingShippingDB in SQL Server.
-2. Execute the SQL scripts in the SQL folder.
-3. Configure the connection string in Web.config.
-4. Open the solution in Visual Studio.
-5. Build and run the Web API.
-6. Run the frontend and make sure the API URL matches the local Visual Studio URL.
-7. Use Postman to test the API endpoints.
+Testing
 
- Bonus
+The API can be tested using Postman, and the frontend can be used to test all CRUD and search operations.
 
-Optional bonus features such as dashboard statistics, advanced search, pagination, sorting, and loading indicators are not implemented in the current version.
-
- Author
+Author
 
 Mostafa Shaban Elhenawy
-
