@@ -3,46 +3,82 @@ using System.Net;
 using System.Web.Http;
 using TrainingShippingSystem.BLL;
 using TrainingShippingSystem.Models;
-
 namespace TrainingShippingSystem.Controllers
 {
     [RoutePrefix("api/Bills")]
     public class BillsController : ApiController
     {
-        private readonly BillBLL billBLL = new BillBLL();
-
-
-        // GET: api/Bills
+        private readonly BillsBLL billsBLL;
+        public BillsController()
+        {
+            billsBLL = new BillsBLL();
+        }
+        // =========================================
+        // GET ALL BILLS
+        // =========================================
         [HttpGet]
         [Route("")]
         public IHttpActionResult GetBills()
         {
             try
             {
-                var bills = billBLL.GetBills();
-
+                var bills =
+                    billsBLL.GetBills();
                 return Ok(bills);
             }
             catch (Exception)
             {
-                return InternalServerError();
+                return Content(
+                    HttpStatusCode.InternalServerError,
+                    "Something went wrong. Please try again."
+                );
             }
         }
-
-
-        // GET: api/Bills/5
+        // =========================================
+        // GET BILL BY ID
+        // =========================================
         [HttpGet]
         [Route("{id:int}")]
         public IHttpActionResult GetBillByID(int id)
         {
             try
             {
-                var bill = billBLL.GetBillByID(id);
-
+                var bill =
+                    billsBLL.GetBillByID(id);
                 if (bill == null)
+                {
                     return NotFound();
-
+                }
                 return Ok(bill);
+            }
+            catch (Exception)
+            {
+                return Content(
+                    HttpStatusCode.InternalServerError,
+                    "Something went wrong. Please try again."
+                );
+            }
+        }
+        // =========================================
+        // INSERT BILL
+        // =========================================
+        [HttpPost]
+        [Route("")]
+        public IHttpActionResult InsertBill(Bill bill)
+        {
+            try
+            {
+                int id =
+                    billsBLL.InsertBill(bill);
+                return Content(
+                    HttpStatusCode.Created,
+                    new
+                    {
+                        ID = id,
+                        Message =
+                            "Bill created successfully."
+                    }
+                );
             }
             catch (ArgumentException ex)
             {
@@ -50,109 +86,156 @@ namespace TrainingShippingSystem.Controllers
             }
             catch (Exception)
             {
-                return InternalServerError();
+                return Content(
+                    HttpStatusCode.InternalServerError,
+                    "Something went wrong. Please try again."
+                );
             }
         }
-
-
-        // POST: api/Bills
-        [HttpPost]
-        [Route("")]
-        public IHttpActionResult InsertBill([FromBody] Bill bill)
-        {
-            try
-            {
-                int newID = billBLL.InsertBill(bill);
-
-                bill.ID = newID;
-
-                return Content(HttpStatusCode.Created, bill);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return InternalServerError(ex);
-            }
-        }
-
-
-        // PUT: api/Bills/5
+        // =========================================
+        // UPDATE BILL
+        // =========================================
         [HttpPut]
         [Route("{id:int}")]
         public IHttpActionResult UpdateBill(
             int id,
-            [FromBody] Bill bill)
+            Bill bill)
         {
             try
             {
                 if (bill == null)
-                    return BadRequest("Bill data is required.");
-
+                {
+                    return BadRequest(
+                        "Bill data is required."
+                    );
+                }
                 bill.ID = id;
-
-                bool updated = billBLL.UpdateBill(bill);
-
-                if (!updated)
+                int rowsAffected =
+                    billsBLL.UpdateBill(bill);
+                if (rowsAffected == 0)
+                {
                     return NotFound();
-
-                return Ok(bill);
+                }
+                return Ok(
+                    new
+                    {
+                        Message =
+                            "Bill updated successfully."
+                    }
+                );
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return InternalServerError(ex);
+                return Content(
+                    HttpStatusCode.InternalServerError,
+                    "Something went wrong. Please try again."
+                );
             }
         }
-
-
-        // DELETE: api/Bills/5
+        // =========================================
+        // DELETE BILL
+        // =========================================
         [HttpDelete]
         [Route("{id:int}")]
         public IHttpActionResult DeleteBill(int id)
         {
             try
             {
-                bool deleted = billBLL.DeleteBill(id);
-
-                if (!deleted)
-                    return NotFound();
-
-                return Ok(new
+                int rowsAffected =
+                    billsBLL.DeleteBill(id);
+                if (rowsAffected == 0)
                 {
-                    message = "Bill deleted successfully."
-                });
+                    return NotFound();
+                }
+                return Ok(
+                    new
+                    {
+                        Message =
+                            "Bill deleted successfully."
+                    }
+                );
             }
-            catch (ArgumentException ex)
+            catch (Exception)
             {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return InternalServerError(ex);
+                return Content(
+                    HttpStatusCode.InternalServerError,
+                    "Something went wrong. Please try again."
+                );
             }
         }
-
-
-        // GET: api/Bills/search?search=BL2026
+        // =========================================
+        // ADVANCED SEARCH
+        // =========================================
         [HttpGet]
-        [Route("search")]
-        public IHttpActionResult SearchBills(string search)
+        [Route("AdvancedSearch")]
+        public IHttpActionResult AdvancedSearch(
+            string billNumber = null,
+            int? clientID = null,
+            int? voyageID = null)
         {
             try
             {
-                var bills = billBLL.SearchBills(search);
-
+                var bills =
+                    billsBLL.AdvancedSearchBills(
+                        billNumber,
+                        clientID,
+                        voyageID
+                    );
                 return Ok(bills);
             }
             catch (Exception)
             {
-                return InternalServerError();
+                return Content(
+                    HttpStatusCode.InternalServerError,
+                    "Something went wrong. Please try again."
+                );
+            }
+        }
+        // =========================================
+        // FILTER + SEARCH + PAGINATION + SORTING
+        // =========================================
+        [HttpGet]
+        [Route("Filter")]
+        public IHttpActionResult FilterBills(
+            string billNumber = null,
+            int? clientID = null,
+            int? voyageID = null,
+            int pageNumber = 1,
+            int pageSize = 10,
+            string sortBy = "ID",
+            string sortDirection = "DESC")
+        {
+            try
+            {
+                var result =
+                    billsBLL.FilterBills(
+                        billNumber,
+                        clientID,
+                        voyageID,
+                        pageNumber,
+                        pageSize,
+                        sortBy,
+                        sortDirection
+                    );
+                return Ok(
+                    new
+                    {
+                        Bills = result.Bills,
+                        TotalRecords =
+                            result.TotalRecords
+                    }
+                );
+            }
+            catch (Exception)
+            {
+                return Content(
+                    HttpStatusCode.InternalServerError,
+                    "Something went wrong. Please try again."
+                );
             }
         }
     }

@@ -2,96 +2,131 @@
 using System.Collections.Generic;
 using TrainingShippingSystem.DAL;
 using TrainingShippingSystem.Models;
-
 namespace TrainingShippingSystem.BLL
 {
-    public class BillBLL
+    public class BillsBLL
     {
-        private readonly BillDAL billDAL = new BillDAL();
-
-
-        // GET ALL
+        private readonly BillsDAL billsDAL;
+        public BillsBLL()
+        {
+            billsDAL = new BillsDAL();
+        }
         public List<Bill> GetBills()
         {
-            return billDAL.GetBills();
+            return billsDAL.GetBills();
         }
-
-
-        // GET BY ID
         public Bill GetBillByID(int id)
         {
-            if (id <= 0)
-                throw new ArgumentException("Invalid bill ID.");
-
-            return billDAL.GetBillByID(id);
+            return billsDAL.GetBillByID(id);
         }
-
-
-        // INSERT
         public int InsertBill(Bill bill)
         {
             ValidateBill(bill);
-
-            return billDAL.InsertBill(bill);
+            return billsDAL.InsertBill(bill);
         }
-
-
-        // UPDATE
-        public bool UpdateBill(Bill bill)
+        public int UpdateBill(Bill bill)
         {
-            if (bill.ID <= 0)
-                throw new ArgumentException("Invalid bill ID.");
-
             ValidateBill(bill);
-
-            return billDAL.UpdateBill(bill);
+            return billsDAL.UpdateBill(bill);
         }
-
-
-        // DELETE
-        public bool DeleteBill(int id)
+        public int DeleteBill(int id)
         {
-            if (id <= 0)
-                throw new ArgumentException("Invalid bill ID.");
-
-            return billDAL.DeleteBill(id);
+            return billsDAL.DeleteBill(id);
         }
-
-
-        // SEARCH
-        public List<Bill> SearchBills(string search)
+        public List<Bill> AdvancedSearchBills(
+            string billNumber,
+            int? clientID,
+            int? voyageID)
         {
-            if (string.IsNullOrWhiteSpace(search))
-                return billDAL.GetBills();
-
-            return billDAL.SearchBills(search.Trim());
+            return billsDAL.AdvancedSearchBills(
+                billNumber,
+                clientID,
+                voyageID
+            );
         }
-
-
-        // VALIDATION
+        // =========================================
+        // FILTER + SEARCH + PAGINATION + SORTING
+        // =========================================
+        public FilterBillsResult FilterBills(
+            string billNumber,
+            int? clientID,
+            int? voyageID,
+            int pageNumber,
+            int pageSize,
+            string sortBy,
+            string sortDirection)
+        {
+            if (pageNumber < 1)
+            {
+                pageNumber = 1;
+            }
+            if (pageSize < 1)
+            {
+                pageSize = 10;
+            }
+            if (string.IsNullOrWhiteSpace(sortBy))
+            {
+                sortBy = "ID";
+            }
+            if (string.IsNullOrWhiteSpace(sortDirection))
+            {
+                sortDirection = "DESC";
+            }
+            return billsDAL.FilterBills(
+                billNumber,
+                clientID,
+                voyageID,
+                pageNumber,
+                pageSize,
+                sortBy,
+                sortDirection
+            );
+        }
         private void ValidateBill(Bill bill)
         {
             if (bill == null)
-                throw new ArgumentException("Bill data is required.");
-
-            if (string.IsNullOrWhiteSpace(bill.BillNumber))
-                throw new ArgumentException("Bill Number is required.");
-
-            if (bill.ClientID <= 0)
-                throw new ArgumentException("Client is required.");
-
-            if (bill.VoyageID <= 0)
-                throw new ArgumentException("Voyage is required.");
-
-            if (bill.GrossWeight < 0)
-                throw new ArgumentException("Gross Weight cannot be negative.");
-
-            if (bill.NetWeight < 0)
-                throw new ArgumentException("Net Weight cannot be negative.");
-
-            if (bill.NetWeight > bill.GrossWeight)
+            {
                 throw new ArgumentException(
-                    "Net Weight cannot be greater than Gross Weight.");
+                    "Bill data is required."
+                );
+            }
+            if (string.IsNullOrWhiteSpace(
+                bill.BillNumber))
+            {
+                throw new ArgumentException(
+                    "Bill Number is required."
+                );
+            }
+            if (bill.ClientID <= 0)
+            {
+                throw new ArgumentException(
+                    "Client is required."
+                );
+            }
+            if (bill.VoyageID <= 0)
+            {
+                throw new ArgumentException(
+                    "Voyage is required."
+                );
+            }
+            if (bill.GrossWeight <= 0)
+            {
+                throw new ArgumentException(
+                    "Gross Weight is required."
+                );
+            }
+            if (bill.NetWeight <= 0)
+            {
+                throw new ArgumentException(
+                    "Net Weight is required."
+                );
+            }
+            if (bill.NetWeight > bill.GrossWeight)
+            {
+                throw new ArgumentException(
+                    "Net Weight cannot be greater than Gross Weight."
+                );
+            }
         }
     }
 }

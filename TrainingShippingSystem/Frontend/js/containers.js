@@ -8,6 +8,20 @@ const billsApiUrl =
 let billsData = [];
 
 
+$(document).ajaxStart(function () {
+
+    $("#loadingIndicator").css("display", "flex");
+
+});
+
+
+$(document).ajaxStop(function () {
+
+    $("#loadingIndicator").hide();
+
+});
+
+
 $(document).ready(function () {
 
     loadBillsDropdown();

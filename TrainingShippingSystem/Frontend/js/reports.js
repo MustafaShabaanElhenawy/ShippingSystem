@@ -2,6 +2,20 @@
     "https://localhost:44320/api/Reports";
 
 
+
+$(document).ajaxStart(function () {
+
+    $("#loadingIndicator").css("display", "flex");
+
+});
+
+
+$(document).ajaxStop(function () {
+
+    $("#loadingIndicator").hide();
+
+});
+
 $(document).ready(function () {
 
     loadReports();

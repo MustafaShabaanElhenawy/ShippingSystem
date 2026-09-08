@@ -1,6 +1,20 @@
 ﻿const apiBaseUrl = "https://localhost:44320/api/Voyages";
 
 
+$(document).ajaxStart(function () {
+
+    $("#loadingIndicator").css("display", "flex");
+
+});
+
+
+$(document).ajaxStop(function () {
+
+    $("#loadingIndicator").hide();
+
+});
+
+
 $(document).ready(function () {
 
     loadVoyages();

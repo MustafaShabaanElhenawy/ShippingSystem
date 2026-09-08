@@ -156,6 +156,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="BLL\BillBLL.cs" />
+    <Compile Include="BLL\DashboardBLL.cs" />
     <Compile Include="BLL\ShippingReportBLL.cs" />
     <Compile Include="BLL\ContainerBLL.cs" />
     <Compile Include="BLL\VoyageBLL.cs" />
@@ -163,9 +164,11 @@
     <Compile Include="Controllers\BillsController.cs" />
     <Compile Include="Controllers\ClientsController.cs" />
     <Compile Include="Controllers\ContainersController.cs" />
+    <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\VoyagesController.cs" />
     <Compile Include="DAL\BillDAL.cs" />
+    <Compile Include="DAL\DashboardDAL.cs" />
     <Compile Include="DAL\ShippingReportDAL.cs" />
     <Compile Include="DAL\ContainerDAL.cs" />
     <Compile Include="DAL\VoyageDAL.cs" />
@@ -178,6 +181,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Bill.cs" />
+    <Compile Include="Models\DashboardStatistics.cs" />
     <Compile Include="Models\ShippingReport.cs" />
     <Compile Include="Models\Container.cs" />
     <Compile Include="Models\Voyage.cs" />
@@ -207,6 +211,7 @@
     <Content Include="Frontend\js\bills.js" />
     <Content Include="Frontend\js\clients.js" />
     <Content Include="Frontend\js\containers.js" />
+    <Content Include="Frontend\js\dashboard.js" />
     <Content Include="Frontend\js\reports.js" />
     <Content Include="Frontend\js\voyages.js" />
     <Content Include="Frontend\reports.html" />
