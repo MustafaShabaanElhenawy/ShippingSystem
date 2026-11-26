@@ -435,4 +435,3 @@ Not implemented in this version:
 ## Author
 
 **Mostafa Shaban Elhenawy**
-Software Engineering Trainee at IST
