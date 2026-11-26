@@ -9,8 +9,27 @@ namespace TrainingShippingSystem.Controllers
     [RoutePrefix("api/Voyages")]
     public class VoyagesController : ApiController
     {
-        private readonly VoyageBLL voyageBLL = new VoyageBLL();
+        private readonly VoyageBLL voyageBLL;
+        private readonly AuditLoggingService auditLoggingService;
 
+        public VoyagesController()
+        {
+            voyageBLL = new VoyageBLL();
+            auditLoggingService = new AuditLoggingService();
+        }
+
+        private string GetAuditUserName()
+        {
+            if (User != null &&
+                User.Identity != null &&
+                User.Identity.IsAuthenticated &&
+                !string.IsNullOrWhiteSpace(User.Identity.Name))
+            {
+                return User.Identity.Name;
+            }
+
+            return "Anonymous";
+        }
 
         // GET: api/Voyages
         [HttpGet]
@@ -20,7 +39,6 @@ namespace TrainingShippingSystem.Controllers
             try
             {
                 var voyages = voyageBLL.GetVoyages();
-
                 return Ok(voyages);
             }
             catch (Exception)
@@ -28,7 +46,6 @@ namespace TrainingShippingSystem.Controllers
                 return InternalServerError();
             }
         }
-
 
         // GET: api/Voyages/5
         [HttpGet]
@@ -54,7 +71,6 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // POST: api/Voyages
         [HttpPost]
         [Route("")]
@@ -65,6 +81,16 @@ namespace TrainingShippingSystem.Controllers
                 int newID = voyageBLL.InsertVoyage(voyage);
 
                 voyage.ID = newID;
+
+                var createdVoyage = voyageBLL.GetVoyageByID(newID) ?? voyage;
+
+                auditLoggingService.LogCreate(
+                    GetAuditUserName(),
+                    "Voyages",
+                    newID,
+                    "Created voyage: " + voyage.VoyageNumber,
+                    AuditLogChangeTracker.ForCreate(createdVoyage)
+                );
 
                 return Content(HttpStatusCode.Created, voyage);
             }
@@ -78,16 +104,22 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // PUT: api/Voyages/5
         [HttpPut]
         [Route("{id:int}")]
-        public IHttpActionResult UpdateVoyage(int id, [FromBody] Voyage voyage)
+        public IHttpActionResult UpdateVoyage(
+            int id,
+            [FromBody] Voyage voyage)
         {
             try
             {
                 if (voyage == null)
                     return BadRequest("Voyage data is required.");
+
+                var existingVoyage = voyageBLL.GetVoyageByID(id);
+
+                if (existingVoyage == null)
+                    return NotFound();
 
                 voyage.ID = id;
 
@@ -96,7 +128,26 @@ namespace TrainingShippingSystem.Controllers
                 if (!updated)
                     return NotFound();
 
-                return Ok(voyage);
+                var updatedVoyage = voyageBLL.GetVoyageByID(id);
+
+                var changedDetails =
+                    AuditLogChangeTracker.Compare(
+                        existingVoyage,
+                        updatedVoyage
+                    );
+
+                if (changedDetails.Count > 0)
+                {
+                    auditLoggingService.LogUpdate(
+                        GetAuditUserName(),
+                        "Voyages",
+                        id,
+                        "Updated voyage: " + updatedVoyage.VoyageNumber,
+                        changedDetails
+                    );
+                }
+
+                return Ok(updatedVoyage);
             }
             catch (ArgumentException ex)
             {
@@ -108,7 +159,6 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // DELETE: api/Voyages/5
         [HttpDelete]
         [Route("{id:int}")]
@@ -116,10 +166,23 @@ namespace TrainingShippingSystem.Controllers
         {
             try
             {
+                var existingVoyage = voyageBLL.GetVoyageByID(id);
+
+                if (existingVoyage == null)
+                    return NotFound();
+
                 bool deleted = voyageBLL.DeleteVoyage(id);
 
                 if (!deleted)
                     return NotFound();
+
+                auditLoggingService.LogDelete(
+                    GetAuditUserName(),
+                    "Voyages",
+                    id,
+                    "Deleted voyage: " + existingVoyage.VoyageNumber,
+                    AuditLogChangeTracker.ForDelete(existingVoyage)
+                );
 
                 return Ok(new
                 {
@@ -136,7 +199,6 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // GET: api/Voyages/search?search=Ocean
         [HttpGet]
         [Route("search")]
@@ -145,7 +207,6 @@ namespace TrainingShippingSystem.Controllers
             try
             {
                 var voyages = voyageBLL.SearchVoyages(search);
-
                 return Ok(voyages);
             }
             catch (Exception)

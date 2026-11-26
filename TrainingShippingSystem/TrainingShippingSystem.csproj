@@ -155,35 +155,53 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="BLL\AuditLogBLL.cs" />
+    <Compile Include="BLL\AuditLogChangeTracker.cs" />
+    <Compile Include="BLL\AuditLoggingService.cs" />
+    <Compile Include="BLL\AuthBLL.cs" />
     <Compile Include="BLL\BillBLL.cs" />
     <Compile Include="BLL\DashboardBLL.cs" />
+    <Compile Include="BLL\PasswordHasher.cs" />
     <Compile Include="BLL\ShippingReportBLL.cs" />
     <Compile Include="BLL\ContainerBLL.cs" />
     <Compile Include="BLL\VoyageBLL.cs" />
     <Compile Include="BLL\ClientBLL.cs" />
+    <Compile Include="Controllers\AuditLogsController.cs" />
+    <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\BillsController.cs" />
     <Compile Include="Controllers\ClientsController.cs" />
     <Compile Include="Controllers\ContainersController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\VoyagesController.cs" />
+    <Compile Include="DAL\AuditLogDAL.cs" />
     <Compile Include="DAL\BillDAL.cs" />
     <Compile Include="DAL\DashboardDAL.cs" />
     <Compile Include="DAL\ShippingReportDAL.cs" />
     <Compile Include="DAL\ContainerDAL.cs" />
+    <Compile Include="DAL\UserDAL.cs" />
+    <Compile Include="DAL\UserSessionDAL.cs" />
     <Compile Include="DAL\VoyageDAL.cs" />
     <Compile Include="DAL\ClientDAL.cs" />
     <Content Include="Frontend\bills.html" />
     <Content Include="Frontend\clients.html" />
     <Content Include="Frontend\containers.html" />
+    <Content Include="Frontend\css\auth.css" />
     <Content Include="Frontend\css\style.css" />
+    <Compile Include="Filters\AdminOnlyAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Handlers\AuthTokenHandler.cs" />
+    <Compile Include="Models\AuditLog.cs" />
+    <Compile Include="Models\AuditLogDetail.cs" />
+    <Compile Include="Models\AuditLogFilter.cs" />
+    <Compile Include="Models\AuditLogPagedResult.cs" />
     <Compile Include="Models\Bill.cs" />
     <Compile Include="Models\DashboardStatistics.cs" />
     <Compile Include="Models\ShippingReport.cs" />
     <Compile Include="Models\Container.cs" />
+    <Compile Include="Models\User.cs" />
     <Compile Include="Models\Voyage.cs" />
     <Compile Include="Models\Client.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -208,13 +226,20 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="Frontend\index.html" />
+    <Content Include="Frontend\js\audit-logs.js" />
+    <Content Include="Frontend\js\auth.js" />
     <Content Include="Frontend\js\bills.js" />
     <Content Include="Frontend\js\clients.js" />
     <Content Include="Frontend\js\containers.js" />
     <Content Include="Frontend\js\dashboard.js" />
+    <Content Include="Frontend\js\login.js" />
+    <Content Include="Frontend\js\register.js" />
     <Content Include="Frontend\js\reports.js" />
     <Content Include="Frontend\js\voyages.js" />
+    <Content Include="Frontend\login.html" />
+    <Content Include="Frontend\register.html" />
     <Content Include="Frontend\reports.html" />
+    <Content Include="Frontend\audit-logs.html" />
     <Content Include="Frontend\voyages.html" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -265,6 +290,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\AuditLogs\" />
+    <Folder Include="Views\Auth\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\bootstrap.min.js.map" />

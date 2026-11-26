@@ -10,12 +10,26 @@ namespace TrainingShippingSystem.Controllers
     public class ClientsController : ApiController
     {
         private readonly ClientBLL clientBLL;
+        private readonly AuditLoggingService auditLoggingService;
 
         public ClientsController()
         {
             clientBLL = new ClientBLL();
+            auditLoggingService = new AuditLoggingService();
         }
 
+        private string GetAuditUserName()
+        {
+            if (User != null &&
+                User.Identity != null &&
+                User.Identity.IsAuthenticated &&
+                !string.IsNullOrWhiteSpace(User.Identity.Name))
+            {
+                return User.Identity.Name;
+            }
+
+            return "Anonymous";
+        }
 
         // GET: api/Clients
         [HttpGet]
@@ -24,9 +38,7 @@ namespace TrainingShippingSystem.Controllers
         {
             try
             {
-                var clients =
-                    clientBLL.GetAllClients();
-
+                var clients = clientBLL.GetAllClients();
                 return Ok(clients);
             }
             catch (Exception)
@@ -35,7 +47,6 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // GET: api/Clients/5
         [HttpGet]
         [Route("{id:int}")]
@@ -43,13 +54,10 @@ namespace TrainingShippingSystem.Controllers
         {
             try
             {
-                var client =
-                    clientBLL.GetClientByID(id);
+                var client = clientBLL.GetClientByID(id);
 
                 if (client == null)
-                {
                     return NotFound();
-                }
 
                 return Ok(client);
             }
@@ -63,7 +71,6 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // GET: api/Clients/search?search=Ahmed
         [HttpGet]
         [Route("search")]
@@ -71,9 +78,7 @@ namespace TrainingShippingSystem.Controllers
         {
             try
             {
-                var clients =
-                    clientBLL.SearchClients(search);
-
+                var clients = clientBLL.SearchClients(search);
                 return Ok(clients);
             }
             catch (Exception)
@@ -82,7 +87,6 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // POST: api/Clients
         [HttpPost]
         [Route("")]
@@ -90,17 +94,22 @@ namespace TrainingShippingSystem.Controllers
         {
             try
             {
-                int newID =
-                    clientBLL.AddClient(client);
+                int newID = clientBLL.AddClient(client);
 
-                var createdClient =
-                    clientBLL.GetClientByID(newID);
+                var createdClient = clientBLL.GetClientByID(newID);
+
+                auditLoggingService.LogCreate(
+                    GetAuditUserName(),
+                    "Clients",
+                    newID,
+                    "Created client: " + createdClient.Name,
+                    AuditLogChangeTracker.ForCreate(createdClient)
+                );
 
                 return Created(
-                    Request.RequestUri +
-                    "/" +
-                    newID,
-                    createdClient);
+                    Request.RequestUri + "/" + newID,
+                    createdClient
+                );
             }
             catch (ArgumentException ex)
             {
@@ -108,11 +117,9 @@ namespace TrainingShippingSystem.Controllers
             }
             catch (SqlException ex)
             {
-                if (ex.Number == 2601 ||
-                    ex.Number == 2627)
+                if (ex.Number == 2601 || ex.Number == 2627)
                 {
-                    return BadRequest(
-                        "Email already exists.");
+                    return BadRequest("Email already exists.");
                 }
 
                 return InternalServerError();
@@ -123,42 +130,46 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // PUT: api/Clients/5
         [HttpPut]
         [Route("{id:int}")]
-        public IHttpActionResult Put(
-            int id,
-            Client client)
+        public IHttpActionResult Put(int id, Client client)
         {
             try
             {
                 if (client == null)
-                {
-                    return BadRequest(
-                        "Client data is required.");
-                }
+                    return BadRequest("Client data is required.");
+
+                var existingClient = clientBLL.GetClientByID(id);
+
+                if (existingClient == null)
+                    return NotFound();
 
                 client.ID = id;
 
-                var existingClient =
-                    clientBLL.GetClientByID(id);
-
-                if (existingClient == null)
-                {
-                    return NotFound();
-                }
-
-                bool updated =
-                    clientBLL.UpdateClient(client);
+                bool updated = clientBLL.UpdateClient(client);
 
                 if (!updated)
-                {
                     return NotFound();
-                }
 
-                var updatedClient =
-                    clientBLL.GetClientByID(id);
+                var updatedClient = clientBLL.GetClientByID(id);
+
+                var changedDetails =
+                    AuditLogChangeTracker.Compare(
+                        existingClient,
+                        updatedClient
+                    );
+
+                if (changedDetails.Count > 0)
+                {
+                    auditLoggingService.LogUpdate(
+                        GetAuditUserName(),
+                        "Clients",
+                        id,
+                        "Updated client: " + updatedClient.Name,
+                        changedDetails
+                    );
+                }
 
                 return Ok(updatedClient);
             }
@@ -168,11 +179,9 @@ namespace TrainingShippingSystem.Controllers
             }
             catch (SqlException ex)
             {
-                if (ex.Number == 2601 ||
-                    ex.Number == 2627)
+                if (ex.Number == 2601 || ex.Number == 2627)
                 {
-                    return BadRequest(
-                        "Email already exists.");
+                    return BadRequest("Email already exists.");
                 }
 
                 return InternalServerError();
@@ -183,7 +192,6 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // DELETE: api/Clients/5
         [HttpDelete]
         [Route("{id:int}")]
@@ -191,28 +199,28 @@ namespace TrainingShippingSystem.Controllers
         {
             try
             {
-                var existingClient =
-                    clientBLL.GetClientByID(id);
+                var existingClient = clientBLL.GetClientByID(id);
 
                 if (existingClient == null)
-                {
                     return NotFound();
-                }
 
-                bool deleted =
-                    clientBLL.DeleteClient(id);
+                bool deleted = clientBLL.DeleteClient(id);
 
                 if (!deleted)
-                {
                     return NotFound();
-                }
 
-                return Ok(
-                    new
-                    {
-                        message =
-                            "Client deleted successfully."
-                    });
+                auditLoggingService.LogDelete(
+                    GetAuditUserName(),
+                    "Clients",
+                    id,
+                    "Deleted client: " + existingClient.Name,
+                    AuditLogChangeTracker.ForDelete(existingClient)
+                );
+
+                return Ok(new
+                {
+                    message = "Client deleted successfully."
+                });
             }
             catch (ArgumentException ex)
             {
@@ -220,11 +228,11 @@ namespace TrainingShippingSystem.Controllers
             }
             catch (SqlException ex)
             {
-                // Foreign Key violation
                 if (ex.Number == 547)
                 {
                     return BadRequest(
-                        "Cannot delete this client because it is linked to existing bills.");
+                        "Cannot delete this client because it is linked to existing bills."
+                    );
                 }
 
                 return InternalServerError();

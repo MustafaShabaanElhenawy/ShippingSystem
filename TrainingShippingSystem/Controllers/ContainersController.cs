@@ -9,9 +9,27 @@ namespace TrainingShippingSystem.Controllers
     [RoutePrefix("api/Containers")]
     public class ContainersController : ApiController
     {
-        private readonly ContainerBLL containerBLL =
-            new ContainerBLL();
+        private readonly ContainerBLL containerBLL;
+        private readonly AuditLoggingService auditLoggingService;
 
+        public ContainersController()
+        {
+            containerBLL = new ContainerBLL();
+            auditLoggingService = new AuditLoggingService();
+        }
+
+        private string GetAuditUserName()
+        {
+            if (User != null &&
+                User.Identity != null &&
+                User.Identity.IsAuthenticated &&
+                !string.IsNullOrWhiteSpace(User.Identity.Name))
+            {
+                return User.Identity.Name;
+            }
+
+            return "Anonymous";
+        }
 
         // GET: api/Containers
         [HttpGet]
@@ -20,9 +38,7 @@ namespace TrainingShippingSystem.Controllers
         {
             try
             {
-                var containers =
-                    containerBLL.GetContainers();
-
+                var containers = containerBLL.GetContainers();
                 return Ok(containers);
             }
             catch (Exception)
@@ -31,7 +47,6 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // GET: api/Containers/5
         [HttpGet]
         [Route("{id:int}")]
@@ -39,8 +54,7 @@ namespace TrainingShippingSystem.Controllers
         {
             try
             {
-                var container =
-                    containerBLL.GetContainerByID(id);
+                var container = containerBLL.GetContainerByID(id);
 
                 if (container == null)
                     return NotFound();
@@ -57,7 +71,6 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // POST: api/Containers
         [HttpPost]
         [Route("")]
@@ -66,14 +79,22 @@ namespace TrainingShippingSystem.Controllers
         {
             try
             {
-                int newID =
-                    containerBLL.InsertContainer(container);
+                int newID = containerBLL.InsertContainer(container);
 
                 container.ID = newID;
 
-                return Content(
-                    HttpStatusCode.Created,
-                    container);
+                var createdContainer =
+                    containerBLL.GetContainerByID(newID) ?? container;
+
+                auditLoggingService.LogCreate(
+                    GetAuditUserName(),
+                    "Containers",
+                    newID,
+                    "Created container: " + container.ContainerNumber,
+                    AuditLogChangeTracker.ForCreate(createdContainer)
+                );
+
+                return Content(HttpStatusCode.Created, container);
             }
             catch (ArgumentException ex)
             {
@@ -84,7 +105,6 @@ namespace TrainingShippingSystem.Controllers
                 return InternalServerError(ex);
             }
         }
-
 
         // PUT: api/Containers/5
         [HttpPut]
@@ -96,18 +116,42 @@ namespace TrainingShippingSystem.Controllers
             try
             {
                 if (container == null)
-                    return BadRequest(
-                        "Container data is required.");
+                    return BadRequest("Container data is required.");
+
+                var existingContainer =
+                    containerBLL.GetContainerByID(id);
+
+                if (existingContainer == null)
+                    return NotFound();
 
                 container.ID = id;
 
-                bool updated =
-                    containerBLL.UpdateContainer(container);
+                bool updated = containerBLL.UpdateContainer(container);
 
                 if (!updated)
                     return NotFound();
 
-                return Ok(container);
+                var updatedContainer =
+                    containerBLL.GetContainerByID(id);
+
+                var changedDetails =
+                    AuditLogChangeTracker.Compare(
+                        existingContainer,
+                        updatedContainer
+                    );
+
+                if (changedDetails.Count > 0)
+                {
+                    auditLoggingService.LogUpdate(
+                        GetAuditUserName(),
+                        "Containers",
+                        id,
+                        "Updated container: " + updatedContainer.ContainerNumber,
+                        changedDetails
+                    );
+                }
+
+                return Ok(updatedContainer);
             }
             catch (ArgumentException ex)
             {
@@ -119,7 +163,6 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // DELETE: api/Containers/5
         [HttpDelete]
         [Route("{id:int}")]
@@ -127,16 +170,28 @@ namespace TrainingShippingSystem.Controllers
         {
             try
             {
-                bool deleted =
-                    containerBLL.DeleteContainer(id);
+                var existingContainer =
+                    containerBLL.GetContainerByID(id);
+
+                if (existingContainer == null)
+                    return NotFound();
+
+                bool deleted = containerBLL.DeleteContainer(id);
 
                 if (!deleted)
                     return NotFound();
 
+                auditLoggingService.LogDelete(
+                    GetAuditUserName(),
+                    "Containers",
+                    id,
+                    "Deleted container: " + existingContainer.ContainerNumber,
+                    AuditLogChangeTracker.ForDelete(existingContainer)
+                );
+
                 return Ok(new
                 {
-                    message =
-                        "Container deleted successfully."
+                    message = "Container deleted successfully."
                 });
             }
             catch (ArgumentException ex)
@@ -149,18 +204,14 @@ namespace TrainingShippingSystem.Controllers
             }
         }
 
-
         // GET: api/Containers/search?search=ABCU
         [HttpGet]
         [Route("search")]
-        public IHttpActionResult SearchContainers(
-            string search)
+        public IHttpActionResult SearchContainers(string search)
         {
             try
             {
-                var containers =
-                    containerBLL.SearchContainers(search);
-
+                var containers = containerBLL.SearchContainers(search);
                 return Ok(containers);
             }
             catch (Exception)

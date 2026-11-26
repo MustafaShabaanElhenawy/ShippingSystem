@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -17,10 +19,6 @@
 
 <body>
 
-
-  
-
-
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
@@ -33,62 +31,49 @@
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#navbarNav">
-
                 <span class="navbar-toggler-icon"></span>
-
             </button>
 
-            <div class="collapse navbar-collapse"
-                 id="navbarNav">
+            <div class="collapse navbar-collapse" id="navbarNav">
 
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
 
                     <li class="nav-item">
-                        <a class="nav-link active"
-                           href="index.html">
-                            Dashboard
-                        </a>
+                        <a class="nav-link active" href="index.html">Dashboard</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link"
-                           href="clients.html">
-                            Clients
-                        </a>
+                        <a class="nav-link" href="clients.html">Clients</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link"
-                           href="voyages.html">
-                            Voyages
-                        </a>
+                        <a class="nav-link" href="voyages.html">Voyages</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link"
-                           href="bills.html">
-                            Bills
-                        </a>
+                        <a class="nav-link" href="bills.html">Bills</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link"
-                           href="containers.html">
-                            Containers
-                        </a>
+                        <a class="nav-link" href="containers.html">Containers</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link"
-                           href="reports.html">
-                            Reports
-                        </a>
+                        <a class="nav-link" href="reports.html">Reports</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="audit-logs.html">Audit Logs</a>
+                    </li>
+
+                    <li class="nav-item nav-user">
+                        <span class="nav-user-name" id="currentUser"></span>
+                        <a href="#" class="nav-logout" onclick="logout(); return false;">Logout</a>
                     </li>
 
                 </ul>
 
             </div>
-
         </div>
     </nav>
 
@@ -293,6 +278,9 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Auth (لازم بعد jQuery وقبل ملف الصفحة) -->
+    <script src="js/auth.js"></script>
 
     <!-- Dashboard JavaScript -->
     <script src="js/dashboard.js"></script>
